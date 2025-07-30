@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 using namespace std;
 
 class StringBuilder
@@ -60,6 +61,28 @@ class StringBuilder
 
         }
 
+        StringBuilder operator+(const StringBuilder& other) const
+        {
+            StringBuilder result;
+
+            delete[] result.characters;
+
+            int size = index + other.index + 4;
+            result.characters = new char[size]();
+            result.index = 0;
+            for (int i = 0; i < index; i++)
+            {
+                result.characters[result.index++] = characters[i];
+            }
+
+            for (int i = 0; i < other.index; i++)
+            {
+                result.characters[result.index++] = other.characters[i];
+            }
+
+            return result;
+        }
+
         bool operator==(const StringBuilder& other)
         {
             if (index != other.index)
@@ -76,6 +99,11 @@ class StringBuilder
                 }
             }
             return true;
+        }
+
+        string toString() const
+        {
+            return string(characters, index);
         }
 
         friend ostream& operator<<(ostream& out, const StringBuilder& builder);
@@ -125,8 +153,14 @@ int main()
     builder3.append('p');
 
     cout << builder << endl << endl;
-
     cout << "builder1 == builder2: " << (builder1 == builder2) << "\nbuilder1 == builder3: " << (builder1 == builder3) << endl;
     cout << endl;
+
+    StringBuilder addBuilder = builder3 + builder1;
+    cout << addBuilder << endl;
+    cout << endl;
+
+    string cat = builder1.toString();
+    cout << cat << endl;
     return 0;
 }
