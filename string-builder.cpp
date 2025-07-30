@@ -39,10 +39,6 @@ class StringBuilder
 
         void append(char character)
         {
-            if (index == 0)
-            {
-                characters[index] = character;
-            }
             if (characters[index] != '\0')
             {
                 char* new_characters = new char[index + 4]();
@@ -62,6 +58,24 @@ class StringBuilder
             }
             index ++;
 
+        }
+
+        bool operator==(const StringBuilder& other)
+        {
+            if (index != other.index)
+            {
+                return false;
+            }
+
+            int i;
+            for (i = 0; i < index; i++)
+            {
+                if (characters[i] != other.characters[i])
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         friend ostream& operator<<(ostream& out, const StringBuilder& builder);
@@ -95,6 +109,24 @@ int main()
     builder.append('t');
     builder.append('z');
 
-    cout << builder << endl;
+    StringBuilder builder1;
+    builder1.append('c');
+    builder1.append('a');
+    builder1.append('t');
+
+    StringBuilder builder2;
+    builder2.append('c');
+    builder2.append('a');
+    builder2.append('t');
+
+    StringBuilder builder3;
+    builder3.append('c');
+    builder3.append('a');
+    builder3.append('p');
+
+    cout << builder << endl << endl;
+
+    cout << "builder1 == builder2: " << (builder1 == builder2) << "\nbuilder1 == builder3: " << (builder1 == builder3) << endl;
+    cout << endl;
     return 0;
 }
