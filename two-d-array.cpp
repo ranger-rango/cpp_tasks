@@ -24,8 +24,10 @@ int main()
 
         for (j = 0; j < 5; j++)
         {
-            cout << "matrix[" << i << "][" << j << "] : " << *(*(matrix + i) + j) << endl;
+            // cout << "matrix[" << i << "][" << j << "] : " << *(*(matrix + i) + j) << endl;
+            cout << "[" << *(*(matrix + i) + j) << "]";
         }
+        cout << endl;
         
     }    
 
