@@ -22,10 +22,12 @@ class Currency
 
         Currency& operator=(const Currency& other)
         {
-            currencyName = other.currencyName;
-            currencyAmount = other.currencyAmount;
-            currencyConversionRate = other.currencyConversionRate;
-
+            if (this != &other)
+            {
+                currencyName = other.currencyName;
+                currencyAmount = other.currencyAmount;
+                currencyConversionRate = other.currencyConversionRate;
+            }
             return *this;
         }
 
