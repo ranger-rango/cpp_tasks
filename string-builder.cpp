@@ -5,11 +5,12 @@ using namespace std;
 class StringBuilder
 {
     int index = 0;
+    int capacity = 4;
     char* characters;
 
     public:
         StringBuilder()
-        : characters(new char[4]())
+        : characters(new char[capacity]())
         {}
 
         StringBuilder(const StringBuilder& other)
@@ -40,9 +41,10 @@ class StringBuilder
 
         void append(char character)
         {
-            if (characters[index] != '\0')
+            if (index >= capacity)
             {
-                char* new_characters = new char[index + 4]();
+                capacity = index + 4;
+                char* new_characters = new char[capacity]();
                 int i;
                 for (i = 0; i <= index; i++)
                 {
