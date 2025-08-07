@@ -1,11 +1,11 @@
 #include <iostream>
 #include <string>
+#include <algorithm>
 using namespace std;
 
 template <class T>
 class Vectr
 {
-    // private:
     protected:
         T* vectr;
         int index = 0;
@@ -17,9 +17,10 @@ class Vectr
         {}
 
         Vectr(const Vectr<T>& other)
-        : index(other.index), vectr(new T[index]())
+        : index(other.index), capacity(other.capacity), vectr(new T[capacity]())
         {
-            copy(other.vectr, other.vectr + index, vectr);
+            cout << index << " q " << capacity << endl;
+            copy(other.vectr, other.vectr + other.index, vectr);
         }
 
         Vectr& operator=(const Vectr<T>& other)
@@ -28,7 +29,8 @@ class Vectr
             {
                 delete[] vectr;
                 index = other.index;
-                vectr = new T[index]();
+                capacity = other.capacity;
+                vectr = new T[capacity]();
                 for (int i = 0; i < index; i++)
                 {
                     *(vectr + i) = other.vectr[i];
@@ -36,10 +38,10 @@ class Vectr
 
             }
 
-            return this;
+            return *this;
         }
 
-        virtual void push(T item)
+        void push(T item)
         {
             if (index >= capacity)
             {
@@ -63,7 +65,7 @@ class Vectr
         template <class U>
         friend ostream& operator<< (ostream& out, const Vectr<U>& vector);
 
-        ~Vectr()
+        virtual ~Vectr()
         {
             delete[] vectr;
             cout << "Vectr Destructor called" << endl;
@@ -81,7 +83,7 @@ ostream& operator<< (ostream& out, const Vectr<U>& vector)
 }
 
 template <typename S>
-class Stack : public Vectr<S>
+class Stack : virtual public Vectr<S>
 {
     public:
         Stack()
@@ -92,28 +94,16 @@ class Stack : public Vectr<S>
         : Vectr<S>(other)
         {}
 
-        Stack<S>& operator=(const Stack<S> other)
+        Stack<S>& operator=(const Stack<S>& other)
         {
             Vectr<S>::operator=(other);
             return *this;
         }
 
-        void push(S item)
-        {
-            Vectr<S>::push(item);
-        }
-
         void pop()
         {
-            if ((this -> index) >= (this -> capacity))
-            {
-                this -> vectr[(this -> index) - 1] = '\0';
-            }
-            else
-            {
-                this -> vectr[(this -> index) - 1] = 0;
-            }
-            (this -> index)--;
+            this->vectr[(this->index) - 1] = '\0';
+            (this->index)--;
         }
 
         ~Stack()
@@ -123,12 +113,14 @@ class Stack : public Vectr<S>
 };
 
 template <typename Q>
-class Queue : public Vectr<Q>
+class Queue : virtual public Vectr<Q>
 {
     public:
         Queue()
         :Vectr<Q>()
-        {}
+        {
+            cout << "constructor called" << endl;
+        }
 
         Queue(const Queue<Q>& other)
         : Vectr<Q>(other)
@@ -137,12 +129,8 @@ class Queue : public Vectr<Q>
         Queue& operator=(const Queue<Q>& other)
         {
             Vectr<Q>::operator=(other);
+            return *this;
         }
-
-        // void push(Q item)
-        // {
-        //     Vectr<Q>::push(item);
-        // }
 
         void popleft()
         {
@@ -162,41 +150,67 @@ class Queue : public Vectr<Q>
         }
 };
 
+template <typename D>
+class Dequeue : public Queue<D>, public Stack<D>
+{
+    public:
+        Dequeue()
+        : Queue<D>()
+        {}
+
+        Dequeue(const Dequeue<D>& other)
+        : Queue<D>(other)
+        {}
+
+        Dequeue& operator=(const Dequeue<D>& other)
+        {
+            Queue<D>::operator=(other);
+            return *this;
+        }
+
+        void pushleft(D item)
+        {
+            if (this->index >= this->capacity)
+            {
+                this->capacity = this->index + 4;
+                D* copy = new D[this->capacity]();
+
+                for (int i = this->index; i >= 1; i--)
+                {
+                    copy[i] = this->vectr[i - 1];
+                }
+                delete[] this->vectr;
+                *(copy) = item;
+                this->vectr = copy;
+            }
+            else
+            {
+                for (int i = this->index; i >= 1; i--)
+                {
+                    this->vectr[i] = this->vectr[i - 1];
+                }
+                *(this->vectr) = item;
+            }
+            this->index++;
+        }
+
+        ~Dequeue()
+        {
+            cout << "Dequeue Destructor called" << endl;
+        }
+};
+
 
 int main()
 {
-    // Vectr<char> x;
-    // x.push('a');
-    // x.push('b');
-    // x.push('c');
-    // x.push('d');
-    // x.push('e');
+    Queue<char> x ;
+    x.push('a');
+    x.push('b');
+    
 
-    // cout << x << endl;
-    // cout << x << endl;
-
-    // Stack<int> stk;
-    // stk.push(1);
-    // stk.push(2);
-    // stk.push(3);
-    // cout << stk << endl;
-    // stk.pop();
-    // cout << stk << endl;
-
-    Vectr<char>* queue = new Queue<char>;
-    queue->push('a');
-    queue->push('v');
-    queue->push('d');
-    queue->push('t');
-    cout << *queue << endl;
-    dynamic_cast< Queue<char>* > (queue)->popleft();
-    cout << *queue << endl;
-
-    cout << endl;
-    Queue<char> queue1 = *dynamic_cast<Queue<char>*> (queue);
-    queue1.push('b');
-    queue1.popleft();
-    cout << queue1 << endl << endl << *queue << endl;
+    Queue<char> y = x;
+    y.push('b');
+    cout << x << endl << endl << y;
 
     return 0;
 }
