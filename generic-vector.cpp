@@ -19,7 +19,6 @@ class Vectr
         Vectr(const Vectr<T>& other)
         : index(other.index), capacity(other.capacity), vectr(new T[capacity]())
         {
-            cout << index << " q " << capacity << endl;
             copy(other.vectr, other.vectr + other.index, vectr);
         }
 
@@ -52,8 +51,8 @@ class Vectr
                     copy[j] = vectr[j];
                 }
                 delete[] vectr;
-                copy[index] = item;
                 vectr = copy;
+                vectr[index] = item;
             }
             else
             {
@@ -206,11 +205,15 @@ int main()
     Queue<char> x ;
     x.push('a');
     x.push('b');
+    x.push('c');
+    x.push('d');
+    x.push('e');
+    x.push('f');
     
-
-    Queue<char> y = x;
+    Queue<char> y;
     y.push('b');
-    cout << x << endl << endl << y;
+    y = x;
+    cout << x << endl << y;
 
     return 0;
 }
