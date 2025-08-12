@@ -120,6 +120,8 @@ int main()
 
     delete kangaroo;
 
+    Kangaroo* kangaroo1 = dynamic_cast<Kangaroo*> (kangaroo);
+
 
     return 0;
 }

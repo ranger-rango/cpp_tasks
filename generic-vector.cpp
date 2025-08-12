@@ -215,5 +215,16 @@ int main()
     y = x;
     cout << x << endl << y;
 
+    // Queue<int>* nums = new Queue<int>;
+    // nums->push(1);
+    // nums->push(2);
+    // nums->push(3);
+    // nums->push(4);
+    // nums->push(5);
+
+    // Queue<int>* nums2 = nums;
+    // nums2->popleft();
+    // cout << *nums2 << endl;
+
     return 0;
 }
