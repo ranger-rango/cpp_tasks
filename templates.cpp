@@ -1,9 +1,10 @@
 #include <iostream>
 #include <string>
+#include <type_traits>
 using namespace std;
 
 template <typename T>
-T genericMin(T a, T b)
+T genericMin(T a, T b)// -> decltype(a < b ? a : b)
 {
     return (a < b ? a : b);
 }
@@ -46,9 +47,9 @@ T GenericNum<T>::operator- (const GenericNum& y)
 
 int main()
 {
-    cout << genericMin(5, 2) << endl;
-    cout << genericMin(2.1, 8.3) << endl;
-    cout << genericMin('r', 'd') << endl;
+    cout << genericMin<>(5, 2) << endl;
+    cout << genericMin<>(2.1, 8.3) << endl;
+    cout << genericMin<>('r', 'd') << endl;
 
     GenericNum<float>* x = new GenericNum<float> (1.3);
     GenericNum<float>* y = new GenericNum<float> (1.4);

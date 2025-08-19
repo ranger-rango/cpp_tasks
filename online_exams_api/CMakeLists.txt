@@ -20,6 +20,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(${PROJECT_NAME} main.cc)
+# add_library(${PROJECT_NAME} SHARED main.cc)
 
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method
@@ -30,6 +31,7 @@ add_executable(${PROJECT_NAME} main.cc)
 # and comment out the following lines
 find_package(Drogon CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
+# target_link_libraries(drogonserver PRIVATE Drogon::Drogon)
 
 # ##############################################################################
 

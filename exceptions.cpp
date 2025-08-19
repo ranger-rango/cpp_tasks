@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <functional>
+// #include <scope>
 using namespace std;
 
 class MathException
@@ -35,11 +37,30 @@ void calculator(int x, int y) // can throw anything.
 }
 // void calculator(int x, int y) noexcept; Guarantees no exceptions 
 
+class Finally
+{
+    public:
+        function<void()> func;
+        Finally(function<void()> f)
+        :   func(move(f))
+        {}
+        ~Finally()
+        {
+            func();
+        }
+};
+
 int main()
 {
     try
     {
-        calculator(6, 34);
+        // scope_exit cleanup{ ...} ;
+        Finally cleanup([]
+        {
+            cout << "This is the finally block" << endl;
+        });
+
+        calculator(0, 34);
 
     }
     catch(ZeroDivision& e)

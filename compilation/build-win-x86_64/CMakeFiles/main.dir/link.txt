@@ -1,0 +1,1 @@
+/usr/bin/x86_64-w64-mingw32-g++ CMakeFiles/main.dir/main.cpp.o -o main  -Wl,-rpath,/C++/cpp_tasks/compilation/build-win-x86_64 libhello.so

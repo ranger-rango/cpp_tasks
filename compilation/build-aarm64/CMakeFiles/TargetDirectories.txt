@@ -1,0 +1,4 @@
+/C++/cpp_tasks/compilation/build-aarm64/CMakeFiles/hello.dir
+/C++/cpp_tasks/compilation/build-aarm64/CMakeFiles/testapp.dir
+/C++/cpp_tasks/compilation/build-aarm64/CMakeFiles/edit_cache.dir
+/C++/cpp_tasks/compilation/build-aarm64/CMakeFiles/rebuild_cache.dir

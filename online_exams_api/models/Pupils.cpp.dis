@@ -1,0 +1,51 @@
+#include "Pupils.h"
+
+using namespace std;
+using namespace drogon;
+using namespace drogon::orm;
+
+template <typename... Args>
+void Pupils::getAll(function<void(Json::Value)> onSuccess, function<void(string)> onError, Args&&... args) const
+{
+    // vector<const char*> paramPtrs;
+    // for (auto& p : params)
+    // {
+    //     paramPtrs.emplace_back(p.c_str());
+    // }
+
+    dbClient -> execSqlAsync(
+        sqlQuery,
+        [onSuccess](const Result& results)
+        {
+            Json::Value jsonArray(Json::arrayValue);
+            for (const auto& row : results)
+            {
+                Json::Value jsonRow;
+                Json::Value name;
+                jsonRow["registration_num"] = row["registration_num"].as<int>();
+                name["surname"] = row["surname"].as<std::string>();
+                name["first_name"] = row["first_name"].as<std::string>();
+
+                jsonRow["name"] = name;
+                jsonArray.append(jsonRow);
+            }
+
+            if (results.empty())
+            {
+                Json::Value error;
+                error["error"] = "There are currently no pupils";
+                onSuccess(error);
+            }
+            else
+            {
+                onSuccess(jsonArray);
+            }
+        },
+        [onError](const DrogonDbException& e)
+        {
+            onError(e.base().what());
+        }
+    );
+}
+
+template void Pupils::getAll<>(std::function<void(Json::Value)>, std::function<void(std::string)>) const;

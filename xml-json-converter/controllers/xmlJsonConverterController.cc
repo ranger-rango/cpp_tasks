@@ -113,6 +113,7 @@ void xmlJsonConverterController::xmlJsonConverter(const HttpRequestPtr& req, fun
         }
 
         Value jsonData = converter(doc.document_element());
+        // Value jsonData = converter(doc.select_node("/*").node());
         StreamWriterBuilder wbuilder;
         string jsonStr = writeString(wbuilder, jsonData);
         auto resp = HttpResponse::newHttpJsonResponse(jsonData);

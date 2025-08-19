@@ -63,6 +63,9 @@ int main()
     int x = 21;
     cout << "square: " << add(&x) << endl;
 
+    auto lambdaMin = [](auto x, auto y) {return x < y ? x : y;};
+    cout << lambdaMin(9, 3.14159) << endl;
+
     return 0;
 
 }

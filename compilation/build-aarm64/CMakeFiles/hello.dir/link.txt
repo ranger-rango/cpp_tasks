@@ -1,0 +1,1 @@
+/usr/bin/aarch64-linux-gnu-g++ -fPIC -Wl,--dependency-file=CMakeFiles/hello.dir/link.d -shared -Wl,-soname,libhello.so -o libhello.so CMakeFiles/hello.dir/hello.cpp.o

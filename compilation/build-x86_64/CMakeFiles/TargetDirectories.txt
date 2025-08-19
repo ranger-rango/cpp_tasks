@@ -1,0 +1,4 @@
+/C++/cpp_tasks/compilation/build-x86_64/CMakeFiles/hello.dir
+/C++/cpp_tasks/compilation/build-x86_64/CMakeFiles/main.dir
+/C++/cpp_tasks/compilation/build-x86_64/CMakeFiles/edit_cache.dir
+/C++/cpp_tasks/compilation/build-x86_64/CMakeFiles/rebuild_cache.dir
