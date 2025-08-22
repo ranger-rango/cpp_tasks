@@ -1,0 +1,35 @@
+Make run.sh executable:
+    chmod +x run.sh
+
+Run the Server:
+    ./run.sh
+
+Server Details:
+    http://localhost:8080/
+
+Endpoints:
+    /convert
+        Uses looping for the conversions, first implementation.
+        Limitation: Ignores xml attributes.
+
+    /pathconvert
+        Uses Xpath and JsonPath for the conversion
+
+        JSON to XML:
+            curl -X POST http://localhost:8080/pathconvert \
+                -H "Content-Type: application/json" \
+                -d '{"student": {"id": "12345", "fullname": "Oscar Ngombo", "age_dob": {"age": 28, "dob": "01-May-1997"} } } '
+
+        XML to JSON:
+            curl -X POST http://localhost:8080/pathconvert \
+                -H "Content-Type: application/xml" \
+                -d '<student id="12345">
+                <Fname>Oscar</Fname>
+                <Lname>Ngombo</Lname>
+                <Age>28</Age>
+                <DOB>01-May-1997</DOB>
+                </student>'
+
+
+Code : 
+    https://github.com/ranger-rango/cpp_tasks/tree/main/xml-json-converter

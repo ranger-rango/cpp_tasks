@@ -73,5 +73,27 @@ target_sources(${PROJECT_NAME}
 # ##############################################################################
 
 add_subdirectory(test)
-find_package(pugixml REQUIRED)
-target_link_libraries(xml-json-converter PRIVATE Drogon::Drogon pugixml)
+# find_package(pugixml REQUIRED)
+# target_link_libraries(xml-json-converter PRIVATE Drogon::Drogon pugixml)
+
+find_library(PUGIXML_LIBRARY pugixml)
+find_path(PUGIXML_INCLUDE_DIR pugixml.hpp)
+
+target_include_directories(xml-json-converter PRIVATE ${PUGIXML_INCLUDE_DIR})
+target_link_libraries(xml-json-converter PRIVATE ${PUGIXML_LIBRARY})
+
+
+# include(FetchContent)
+
+# FetchContent_Declare(
+#   jsoncons
+#   GIT_REPOSITORY https://github.com/danielaparker/jsoncons.git
+#   GIT_TAG master   # or a release like v0.173.0
+# )
+
+# FetchContent_MakeAvailable(jsoncons)
+# target_link_libraries(xml-json-converter PRIVATE Drogon::Drogon jsoncons)
+
+target_include_directories(xml-json-converter PRIVATE
+    ${CMAKE_SOURCE_DIR}/jsoncons/include
+)

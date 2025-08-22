@@ -2,8 +2,13 @@
 #include <pugixml.hpp>
 #include <json/json.h>
 #include <string>
+#include <jsoncons/json.hpp>
+#include <jsoncons_ext/jsonpath/json_query.hpp>
+
 using namespace pugi;
 using namespace Json;
+using namespace jsoncons;
+using namespace jsonpath;
 
 string converter(const Value& json, const string& rootName = "root")
 {
@@ -113,7 +118,6 @@ void xmlJsonConverterController::xmlJsonConverter(const HttpRequestPtr& req, fun
         }
 
         Value jsonData = converter(doc.document_element());
-        // Value jsonData = converter(doc.select_node("/*").node());
         StreamWriterBuilder wbuilder;
         string jsonStr = writeString(wbuilder, jsonData);
         auto resp = HttpResponse::newHttpJsonResponse(jsonData);
@@ -152,4 +156,107 @@ void xmlJsonConverterController::xmlJsonConverter(const HttpRequestPtr& req, fun
 //         xml_node& node - a DOM node from pugixml.
 //         if the node's first child is text (node_pcdata)
 //             return the text value as a Json::Value (string).
+
+
+void xmlJsonConverterController::xmlJsonPathConverter(const HttpRequestPtr& req, function <void (const HttpResponsePtr& )> &&callback)
+{
+    auto contentType = req->getHeader("Content-Type");
+    auto bodyView = req->getBody();
+    string body(bodyView);
+
+    // cout << "Content-Type: " << contentType << endl << "body: " << body << endl;
+    if (contentType.find("application/json") != string::npos)
+    {
+        CharReaderBuilder rbuilder;
+        Value jsonData;
+        string errs;
+        istringstream iss(body);
+        if (!parseFromStream(rbuilder, iss, &jsonData, &errs))
+        {
+            auto resp = HttpResponse::newHttpResponse();
+            resp->setStatusCode(k400BadRequest);
+            resp->setBody("Invalid JSON: " + errs);
+            callback(resp);
+            return;
+        }
+
+        json jsonConsData = json::parse(body);
+        string student = "student";
+        string studentId = json_query(jsonConsData, "$.student.id")[0].as<string>();
+        string fullName = json_query(jsonConsData, "$..fullname")[0].as<string>();
+
+        size_t pos = fullName.find(" ");
+        string firstName = fullName.substr(0, pos);
+        string surname = fullName.substr(pos + 1);
+
+        string age = json_query(jsonConsData, "$..age")[0].as<string>();
+        string dateOBirth = json_query(jsonConsData, "$..dob")[0].as<string>();
+
+        xml_document doc;
+        xml_node studentRoot = doc.append_child(student.c_str());
+        studentRoot.append_attribute("id") = studentId.c_str();
+        xml_node Fname = studentRoot.append_child("Fname");
+        Fname.text().set(firstName.c_str());
+
+        xml_node Lname = studentRoot.append_child("Lname");
+        Lname.text().set(surname.c_str());
+
+        xml_node Age = studentRoot.append_child("Age");
+        Age.text().set(age.c_str());
+
+        xml_node DOB = studentRoot.append_child("DOB");
+        DOB.text().set(dateOBirth.c_str());
+        ostringstream oss;
+        doc.save(oss, " ");
+        string xml = oss.str();
+
+        auto resp = HttpResponse::newHttpResponse();
+        resp->setContentTypeCode(CT_APPLICATION_XML);
+        resp->setBody(xml);
+        callback(resp);
+
+    }
+    else if (contentType.find("application/xml") != string::npos)
+    {
+        xml_document doc;
+        if (!doc.load_string(body.c_str()))
+        {
+            auto resp = HttpResponse::newHttpResponse();
+            resp->setStatusCode(k400BadRequest);
+            resp->setBody("Invalid XML");
+            callback(resp);
+            return;
+        }
+
+        xml_node student = doc.select_node("/*").node();
+        xml_attribute student_id = doc.select_node("/student[@id='12345']").node().attribute("id");
+        xml_node first_name = doc.select_node("//Fname").node();
+        xml_node last_name = doc.select_node("//Lname").node();
+        xml_node age = doc.select_node("//Age").node();
+        xml_node dob = doc.select_node("//DOB").node();
+
+        Value studentJson;
+        Value ageDob;
+        string fullName;
+
+        fullName = (string) first_name.child_value() + " " + (string) last_name.child_value();
+
+        ageDob["Age"] = age.child_value();
+        ageDob["date_of_birth"] = dob.child_value();
+
+        studentJson["identification"] = student_id.value();
+        studentJson["fullname"] = fullName;
+        studentJson["age_dob"] = ageDob;
+
+        auto resp = HttpResponse::newHttpJsonResponse(studentJson);
+        callback(resp);
+    }
+    else
+    {
+        auto resp = HttpResponse::newHttpResponse();
+        resp->setStatusCode(k415UnsupportedMediaType);
+        resp->setBody("Content-Type must be application/json or application/xml");
+        callback(resp);
+    }
+}
         
