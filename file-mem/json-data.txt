@@ -1,0 +1,10 @@
+{
+    "student": {
+            "id": "12345",
+            "fullname": "Oscar Ngombo",
+            "age_dob": {
+                "age": 28,
+                "dob": "01-May-1997"
+            }
+        }
+    }

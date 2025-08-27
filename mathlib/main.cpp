@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-// #include <dlfcn.h>
+#include <dlfcn.h>
 
 using namespace std;
 
@@ -59,25 +59,25 @@ int main()
 
     }
 
-    // void* handle = dlopen("./libmath_utils.so", RTLD_LAZY);
-    // if (!handle)
-    // {
-    //     cerr << "Cannot open library: " << dlerror() << endl;
-    //     return 1;
-    // }
+    void* handle = dlopen("./libmath_utils.so", RTLD_LAZY);
+    if (!handle)
+    {
+        cerr << "Cannot open library: " << dlerror() << endl;
+        return 1;
+    }
 
-    // typedef double (*func_t)(double, double);
-    // func_t func = (func_t) dlsym(handle, "_Z3addIdET_S0_S0_");
+    typedef double (*func_t)(double, double);
+    func_t func = (func_t) dlsym(handle, "_Z3addIdET_S0_S0_");
 
-    // if (!func)
-    // {
-    //     cerr << "Cannot load symbol: " << dlerror() << endl;
-    //     return 1;
-    // }
+    if (!func)
+    {
+        cerr << "Cannot load symbol: " << dlerror() << endl;
+        return 1;
+    }
 
-    // cout << "result: " << func(2.1, 4.3) << endl;
+    cout << "result: " << func(2.1, 4.3) << endl;
 
-    // dlclose(handle);
+    dlclose(handle);
 
     return 0;
 }
