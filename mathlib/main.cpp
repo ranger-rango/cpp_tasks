@@ -14,6 +14,7 @@ extern "C"
     float mult_float(float a, float b);
     int div_int(int a, int b);
     float div_float(float a, float b);
+    double add (double x, double y);
 }
 
 int main()
@@ -67,7 +68,7 @@ int main()
     }
 
     typedef double (*func_t)(double, double);
-    func_t func = (func_t) dlsym(handle, "_Z3addIdET_S0_S0_");
+    func_t func = (func_t) dlsym(handle, "add");
 
     if (!func)
     {

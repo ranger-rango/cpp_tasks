@@ -139,7 +139,7 @@ class File
 
 int main()
 {
-    File file("exmaple.txt");
+    File file("example.txt");
     string jsonStr = R"({
     "student": {
             "id": "12345",

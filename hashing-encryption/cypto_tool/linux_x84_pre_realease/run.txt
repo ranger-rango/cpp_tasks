@@ -1,0 +1,10 @@
+To run the app:
+    1. Make the file executable
+        chmod +x crypt_tool
+    2. Run the run.sh file
+        # Trial run
+        ./run.sh hash sha256 secret.txt
+
+        # Generate your aes Keys as per the readme attached.
+        ./run.sh aes-encrypt 256 aes.key aes.iv secret.txt secret.enc
+        ./run.sh aes-decrypt 256 aes.key aes.iv secret.enc secret.dec.txt
