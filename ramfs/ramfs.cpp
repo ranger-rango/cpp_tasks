@@ -1,338 +1,46 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <string>
-#include <sstream>
-#include <memory>
+#include "ramfs.hpp"
+#include <unordered_map>
 #include <functional>
-
-using namespace std;
-
-class RamFSExceptions
-{
-    private:
-        string errMsg;
-    public:
-        RamFSExceptions(string err)
-        : errMsg(err)
-        {}
-
-        string getErrMsg()
-        {
-            return errMsg;
-        }
-
-        ~RamFSExceptions()
-        {}
-};
-
-class NodeExistsException : public RamFSExceptions
-{
-    public:
-        NodeExistsException(string err)
-        : RamFSExceptions(err)
-        {}
-
-};
-
-class InvalidPathException : public RamFSExceptions
-{
-    public:
-        InvalidPathException(string err)
-        : RamFSExceptions(err)
-        {}
-};
-
-class Node
-{
-    private:
-        bool isDir = false;
-        string name = "";
-        string fileContent;
-        map< string, shared_ptr<Node> > kids;
-        weak_ptr<Node> parent;
-    public:
-        Node()
-        {}
-
-        Node(bool is_dir, const string& dirName)
-        : isDir(is_dir), name(dirName)
-        {}
-
-        void setType (bool is_dir)
-        {
-            isDir = is_dir;
-        }
-
-        void setName(string objName)
-        {
-            name = objName;
-        }
-
-        void setContent(const string& strContent)
-        {
-            if (!isDir)
-            {
-                fileContent = strContent;
-            }
-            else
-            {
-                cerr << "Can not write to directory" << endl;
-            }
-        }
-
-        void setKids(string childName, shared_ptr<Node> childPtr)
-        {
-
-            auto status = kids.insert({childName, childPtr});
-            if (!status.second)
-            {
-                throw NodeExistsException("RamFS Exception: Directory Already Exists ");
-            }
-        }
-
-        void rmKid(string childName)
-        {
-            // shared_ptr<Node> child = kids.at(childName);
-            auto it = kids.find(childName);
-            if (it != kids.end())
-            {
-                shared_ptr<Node> child = it->second;
-                kids.erase(it);
-                child.reset();
-            }
-
-        }
-
-        void setParent(shared_ptr<Node> prnt)
-        {
-            parent = prnt;
-        }
-
-        shared_ptr<Node> getChild(const string& childName)
-        {
-            auto it = kids.find(childName);
-            if (it != kids.end())
-            {
-                return it -> second;
-            }
-            return nullptr;
-        }
-
-        vector<string> getChildren()
-        {
-            vector<string> children;
-            for (const auto& [key, value] : kids)
-            {
-                children.emplace_back(key);
-            }
-
-            return children;
-        }
-
-        weak_ptr<Node> getParent()
-        {
-            return parent;
-        }
-
-        string getContent()
-        {
-            return fileContent;
-        }
-
-        bool getType()
-        {
-            return isDir;
-        }
-
-        string getName()
-        {
-            return name;
-        }
-
-        ~Node()
-        {}
-};
-
-class RamFS
-{
-    private:
-        static string currentDir;
-        static shared_ptr<Node> currentNode;
-        string nodePath = "";
-        // Node node;
-    public:
-        RamFS(string newPath)
-        : nodePath(newPath)
-        {
-        }
-
-        vector<string> split (const string& str, char delimiter)
-        {
-            vector<string> tokens;
-            stringstream ss(str);
-            string item;
-
-            while(getline(ss, item, delimiter))
-            {
-                tokens.emplace_back(item);
-            }
-            return tokens;
-        }
-
-        shared_ptr<Node> pathResolution (const string& path)
-        {
-            auto nodes = split(path, '/');
-            auto currNode = currentNode;
-            shared_ptr<Node> nodeObj;
-
-            if (path[0] == '/')
-            {
-                if (currNode -> getName() != "root")
-                {
-                    throw InvalidPathException("RamFS Exception: Invalid path specified");
-                }
-                for (string& node : nodes)
-                {
-                    nodeObj = currNode -> getChild(node);
-                    if (!nodeObj)
-                    {
-                        throw InvalidPathException("RamFS Exception: Path Component Not Found");
-                    }
-                    if (nodeObj -> getType())
-                    {
-                        currNode = nodeObj;
-                    }
-                }
-            }
-            else if (path[0] == '.')
-            {
-                return currNode;
-            }
-            else if (path.substr(0, 2) == "..")
-            {
-                if (auto currNodeParent = currNode -> getParent().lock())
-                {
-                    currNode = currNodeParent;
-                }
-
-                nodes.erase(nodes.begin());
-                for (string& node : nodes)
-                {
-                    nodeObj = currNode -> getChild(node);
-                    if (nodeObj -> getType())
-                    {
-                        currNode = nodeObj;
-                    }
-                }
-            }
-            else
-            {
-                for (string& node : nodes)
-                {
-                    nodeObj = currNode -> getChild(node);
-                    if (nodeObj -> getType())
-                    {
-                        currNode = nodeObj;
-                    }
-                }
-            }
-
-            return nodeObj;
-        }
-
-        void ls(const string& path = ".")
-        {
-            auto resolvedNode = pathResolution(path);
-            if (!resolvedNode -> getType())
-            {
-                cout << resolvedNode -> getName() << endl;
-                return;
-            }
-            auto children = resolvedNode -> getChildren();
-            for (const auto& child : children)
-            {
-                cout << child << endl;
-            }
-            return;
-        }
-
-        void cd(const string& path = ".")
-        {
-            auto resolvedNode = pathResolution(path);
-            currentNode = resolvedNode;
-            return;
-        }
-
-        int mkdir(const string& dirName)
-        {
-            shared_ptr<Node> child = make_shared<Node> (true, dirName);
-            try
-            {
-                currentNode -> setKids(dirName, child);
-            }
-            catch(NodeExistsException& e)
-            {
-                cerr << e.getErrMsg() << endl;
-            }
-            child -> setParent(currentNode);
-
-            nodePath += currentDir + "/" + dirName;
-            return 0;
-        }
-
-        int rmdir(const string& dirName)
-        {
-            currentNode -> rmKid(dirName);
-            return 0;
-        }
-
-        int mknod(const string& fileName)
-        {
-            shared_ptr<Node> childFile = make_shared<Node> (false, fileName);
-            try
-            {
-                currentNode -> setKids(fileName, childFile);
-            }
-            catch(NodeExistsException& e)
-            {
-                cerr << e.getErrMsg() << endl;
-            }
-            childFile -> setParent(currentNode);
-            nodePath += currentDir + "/" + fileName;
-            return 0;
-        }
-
-        int rmnod(const string& fileName)
-        {
-            currentNode -> rmKid(fileName);
-            return 0;
-        }
-
-        int write(string content, const string& fileName)
-        {
-            shared_ptr<Node> fileNode = currentNode -> getChild(fileName);
-            if (fileNode != nullptr)
-            {
-                fileNode -> setContent(content);
-                return 0;
-            }
-            return 1;
-        }
-
-        string read()
-        {}
-
-        ~RamFS()
-        {}
-
-};
-
-string RamFS::currentDir = "/";
-shared_ptr<Node> RamFS::currentNode = make_shared<Node> (true, "root");
-
 
 int main()
 {
+    // cmds - cd, ls, touch, rm, mkdir, rmdir, exit
+    RamFS ramFS;
+    string fsCmd;
+    unordered_map<string, function< void(const string&) > > commands = 
+    {
+        {"cd", [&](const string& arg){ramFS.cd(arg.empty() ? "." : arg);} },
+        {"ls", [&](const string& arg){ramFS.ls(arg.empty() ? "." : arg);} },
+        {"touch", [&](const string& arg){ramFS.mknod(arg);} },
+        {"rm", [&](const string& arg){ramFS.rmnod(arg);} },
+        {"mkdir", [&](const string& arg){ramFS.mkdir(arg);} },
+        {"rmdir", [&](const string& arg){ramFS.rmdir(arg);} },
+        {"exit", [&](const string& arg){cout << "Catchya Later:)" << endl; exit(0);} }
+    };
+
+    while (true)
+    {
+        cout << "--(RamFS)--[" << ramFS.getCurrentDir() << "]--# ";
+        getline(cin, fsCmd);
+        if (fsCmd.empty()) continue;
+
+        auto fsCmds = ramFS.split(fsCmd, ' ');
+        string cmd = fsCmds[0];
+        string path;
+        if (fsCmds.size() == 2)
+        {
+            path = fsCmds[1];
+        }
+        auto it = commands.find(cmd);
+        if (it != commands.end())
+        {
+            it->second(path);
+        }
+        else
+        {
+            cout << "Unknown command" << endl;
+        }
+    }
+    
     return 0;
 }
